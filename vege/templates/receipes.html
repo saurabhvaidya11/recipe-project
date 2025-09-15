@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>Receipes</title>
+    <style>
+        body {
+            background-color: #f4f4f9;
+            font-family: Arial, sans-serif;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .profile-pic {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>  
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-danger shadow-lg p-3">
+        <div class="container-fluid">
+            <a class="navbar-brand">Food Receipe</a>
+
+            <!-- Search Form -->
+            <form class="d-flex ms-auto me-3" method="get">
+                <input name="search" class="form-control me-2" type="search" placeholder="Search Receipe" aria-label="Search">
+                <button class="btn btn-outline-light" type="submit">Search</button>
+            </form>
+
+            <!-- User Profile Dropdown -->
+            {% if request.user.is_authenticated %}
+            <div class="dropdown me-3">
+                <a class="btn btn-light dropdown-toggle d-flex align-items-center" href="#" role="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if request.user.profile.profile_pic %}
+                        <img src="{{ request.user.profile.profile_pic.url }}" alt="Profile" class="profile-pic">
+                    {% endif %}
+                    {{ request.user.username }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                    <li><a class="dropdown-item" href="#">Profile</a></li>
+                    <li><a class="dropdown-item" href="#">Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="/logout/">Logout</a></li>
+                </ul>
+            </div>
+            {% else %}
+                <a href="/login/" class="btn btn-success">Login</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <!-- Add Receipe Form -->
+        <form class="col-8 mx-auto card p-3 shadow-lg" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h2>ADD RECEIPE</h2>
+            <hr>
+            <div class="mb-3">
+                <label class="form-label">Receipe Name</label>
+                <input name="receipe_name" required type="text" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Receipe Description</label>
+                <textarea class="form-control" name="receipe_description" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Receipe Image</label>
+                <input name="receipe_image" type="file" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-success">Add Receipe</button>
+        </form>
+
+        <hr>
+
+        <!-- Receipes Table -->
+        <table class="table table-success table-striped mt-5">
+            <thead>
+                <tr>
+                    <th scope="col">Sr.No</th>
+                    <th scope="col">Receipe Name</th>
+                    <th scope="col">Receipe Description</th>
+                    <th scope="col">Receipe Image</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for receipe in receipes %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ receipe.receipe_name }}</td>
+                    <td>{{ receipe.receipe_description }}</td>
+                    <td>
+                        {% if receipe.receipe_image %}
+                            <img src="{{ receipe.receipe_image.url }}" style="height: 200px">
+                        {% else %}
+                            <span>No Image</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/delete-receipe/{{ receipe.id }}" class="btn btn-danger m-2">Delete</a>
+                        <a href="/update-receipe/{{ receipe.id }}" class="btn btn-success">Update</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+</body>
+</html>
