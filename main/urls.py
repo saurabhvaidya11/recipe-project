@@ -17,7 +17,11 @@ urlpatterns = [
     path('login/', login_page , name='login_page'),
     path('register/', register_page , name='register_page'),
     path('logout/', logout_page , name="logout_page"),
+    path('like/<int:id>/', views.like_receipe, name="like_receipe"),
+    path('comment/<int:id>/', views.add_comment, name="add_comment"),
+    
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])

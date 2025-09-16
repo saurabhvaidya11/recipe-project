@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +8,9 @@
     <title>Receipes</title>
     <style>
         body {
-            background-color: #f4f4f9;
+            background: url("{% static 'vege/images/background.jpg' %}") no-repeat center center fixed;
+            background-color: cover;
+            background-size: cover;
             font-family: Arial, sans-serif;
         }
         .navbar-brand {
@@ -20,11 +23,22 @@
             object-fit: cover;
             margin-right: 8px;
         }
+
     </style>
 </head>
-<body>  
+<body>
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div> 
+    {% endif %}
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-danger shadow-lg p-3">
+    <nav class="navbar navbar-expand-lg shadow-lg p-3" style="background-color: rgba(255,255,255,0.8);">
         <div class="container-fluid">
             <a class="navbar-brand">Food Receipe</a>
 
@@ -104,8 +118,32 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href="/delete-receipe/{{ receipe.id }}" class="btn btn-danger m-2">Delete</a>
-                        <a href="/update-receipe/{{ receipe.id }}" class="btn btn-success">Update</a>
+                        {% if receipe.user == request.user %}
+                            <a href="/delete-receipe/{{ receipe.id }}" class="btn btn-danger m-2">Delete</a>
+                            <a href="/update-receipe/{{ receipe.id }}" class="btn btn-success">Update</a>
+                        {% endif %}
+
+                        <form action="{% url 'like_receipe' receipe.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-primary m-2">
+                                👍 Like ({{ receipe.like_set.count }})
+                            </button>
+                        </form>
+
+                        <form action="{% url 'add_comment' receipe.id %}" method="post" class="mt-2">
+                            {% csrf_token %}
+                            <input type="text" name="comment" class="form-control" placeholder="Add a comment..." required>
+                            <button type="submit" class="btn btn-outline-secondary mt-1">Comment</button>
+                        </form>
+
+                        <div class="mt-2">
+                            {% for comment in receipe.comment_set.all %}
+                                <p><strong>{{ comment.user.username }}</strong>: {{ comment.text }}</p>
+                            {% empty %}
+                                <p class="text-muted">No comments yet.</p>
+                            {% endfor %}
+                        </div>
+
                     </td>
                 </tr>
                 {% endfor %}

@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+from .models import Receipe, Like, Comment
 
 @login_required(login_url="/login/")
 
@@ -51,10 +53,22 @@ def update_receipe(request, id):
     context = {'receipe': queryset}   
     return render(request, 'update_receipes.html', context)
 
+# def delete_receipe(request, id):
+#     queryset = Receipe.objects.get(id = id)
+#     queryset.delete()            
+#     return redirect('/receipes/')   
+
 def delete_receipe(request, id):
-    queryset = Receipe.objects.get(id = id)
-    queryset.delete()            
-    return redirect('/receipes/')                                   
+    receipe = get_object_or_404(Receipe, id=id)
+
+    # Only owner can delete
+    if receipe.user == request.user:
+        receipe.delete()
+        messages.success(request, "Your recipe was deleted successfully.")
+    else:
+        messages.error(request, "You are not allowed to delete this recipe.")
+
+    return redirect('/receipes/')                                
     
 def login_page(request):
     
@@ -82,6 +96,23 @@ def login_page(request):
 def logout_page(request):
     logout(request)
     return redirect('/login/')
+
+@login_required
+def like_receipe(request, id):
+    receipe = get_object_or_404(Receipe, id=id)
+    like , created = Like.objects.get_or_create(user=request.user, receipe = receipe)
+    if not created:
+        like.delete()
+    return redirect('/receipes/')
+
+@login_required
+def add_comment(request, id):
+    if request.method == "POST":
+        receipe = get_object_or_404(Receipe, id=id)
+        text = request.POST.get("comment")
+        if text.strip():
+            Comment.objects.create(user=request.user, receipe = receipe, text=text)
+    return redirect('/receipes/')
 
 
 def register_page(request):
