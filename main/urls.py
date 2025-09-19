@@ -19,6 +19,8 @@ urlpatterns = [
     path('logout/', logout_page , name="logout_page"),
     path('like/<int:id>/', views.like_receipe, name="like_receipe"),
     path('comment/<int:id>/', views.add_comment, name="add_comment"),
+    path('delete-comment/<int:id>/', views.delete_comment, name="delete_comment"),
+    path('receipe/<int:pk>', views.receipe_detail, name="receipe_detail"),
     
 ]
 

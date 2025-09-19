@@ -5,10 +5,11 @@ from django.contrib.auth.models import User
 
 
 class Receipe(models.Model):
-    user = models.ForeignKey(User , on_delete=models.SET_NULL,null = True , blank=True)
+    user = models.ForeignKey(User , on_delete=models.CASCADE, null=True)
     receipe_name = models.CharField(max_length=100)
     receipe_description = models.TextField()
     receipe_image = models.ImageField(upload_to="receipe")
+    receipe_steps = models.TextField(blank=True, null=True)  #steps of cooking
     receipe_view_count = models.IntegerField(default=1)
     
     def __str__(self):
@@ -20,7 +21,9 @@ class Like(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        unique_together = ('user' , 'receipe')  #user can like only once
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'receipe'], name='unique_user_receipe_like')
+        ]
         
     def __str__(self):
         return f"{self.user.username} likes {self.receipe.receipe_name}" 

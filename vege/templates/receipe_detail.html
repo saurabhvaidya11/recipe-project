@@ -1,0 +1,109 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ receipe.receipe_name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: url("{% static 'vege/images/back2.jpg' %}") no-repeat center center fixed;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+        }
+
+        .overlay {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .recipe-img {
+            max-width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .recipe-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .steps {
+            white-space: pre-line;
+        }
+
+        .comments-box {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="row overlay shadow-lg">
+        <!-- Left side: Recipe Image + Likes + Comments -->
+        <div class="col-md-5 text-center">
+            {% if receipe.receipe_image %}
+                <img src="{{ receipe.receipe_image.url }}" class="recipe-img mb-3" alt="{{ receipe.receipe_name }}">
+            {% endif %}
+            
+            <h4>{{ receipe.user.username }}’s Recipe</h4>
+
+            <!-- Like button -->
+            <form method="post" action="{% url 'like_receipe' receipe.id %}" class="mt-3">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger w-100">
+                    ❤️ Like ({{ receipe.like_set.count }})
+                </button>
+            </form>
+
+            <!-- Comment Form -->
+            <form method="post" action="{% url 'add_comment' receipe.id %}" class="mt-3">
+                {% csrf_token %}
+                <input type="text" name="text" class="form-control mb-2" placeholder="Add a comment..." required>
+                <button type="submit" class="btn btn-primary w-100">Post Comment</button>
+            </form>
+
+            <!-- Show Comments -->
+            <div class="comments-box mt-3 text-start">
+                <h6>Comments:</h6>
+                {% for comment in receipe.comment_set.all %}
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-1">
+                        <p class="mb-0"><strong>{{ comment.user.username }}</strong>: {{ comment.text }}</p>
+                        {% if comment.user == request.user %}
+                            <a href="{% url 'delete_comment' comment.id %}" 
+                               class="text-danger ms-2" 
+                               title="Delete Comment"
+                               onclick="return confirm('Delete this comment?');">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <p class="text-muted">No comments yet. Be the first!</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right side: Recipe Details -->
+        <div class="col-md-7">
+            <h2 class="recipe-title">{{ receipe.receipe_name }}</h2>
+            <p><strong>Description:</strong> {{ receipe.receipe_description }}</p>
+            
+            <hr>
+            <h5>Steps to Cook:</h5>
+            <p class="steps">{{ receipe.steps }}</p>
+
+            <p class="text-muted mt-3">Added by: {{ receipe.user.username }}</p>
+            <a href="{% url 'home' %}" class="btn btn-secondary mt-2">⬅ Back to Recipes</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

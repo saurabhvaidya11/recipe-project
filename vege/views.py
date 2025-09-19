@@ -15,16 +15,20 @@ def receipes(request):
         data = request.POST
         receipe_name = data.get('receipe_name')
         receipe_description = data.get('receipe_description')
+        receipe_steps = request.POST.get("receipe_steps")   # <-- get steps
         receipe_image = request.FILES.get('receipe_image')
         
         Receipe.objects.create(
+            user = request.user,
             receipe_name = receipe_name,
             receipe_description = receipe_description,
+            receipe_steps = receipe_steps,
             receipe_image = receipe_image,
         )
         
         return redirect('/receipes')
     queryset = Receipe.objects.all()
+    
     
     if request.GET.get('search'):
         queryset = queryset.filter(receipe_name__icontains = request.GET.get('search'))
@@ -114,7 +118,13 @@ def add_comment(request, id):
             Comment.objects.create(user=request.user, receipe = receipe, text=text)
     return redirect('/receipes/')
 
-
+@login_required
+def delete_comment(request, id):
+    comment = get_object_or_404(Comment, id=id)
+    if comment.user == request.user:            #only the owner can delete
+        comment.delete()
+    return redirect('/receipes/')
+    
 def register_page(request):
     
     if request.method == "POST":
@@ -141,5 +151,9 @@ def register_page(request):
         
         return redirect('/register/')
     
-    return render(request, 'register.html')   
+    return render(request, 'register.html')  
+
+def receipe_detail(request, pk):
+    receipe = get_object_or_404(Receipe, pk = pk)
+    return render(request, "receipe_detail.html",{"receipe": receipe}) 
     
